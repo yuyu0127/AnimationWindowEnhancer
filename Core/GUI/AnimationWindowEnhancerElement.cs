@@ -12,7 +12,7 @@ namespace AnimationWindowEnhancer.Core
     public class AnimationWindowEnhancerElement : IMGUIContainer
     {
         private readonly AnimationWindow _target;
-        private readonly Dictionary<DopeLineProxy, DopeLineDrawer> _dopeLineDrawers = new();
+        private readonly Dictionary<DopeLineProxy, DopeLineRenderer> _dopeLineRenderers = new();
 
         private bool _isStyleDirty = true;
         private float[] _values;
@@ -37,7 +37,7 @@ namespace AnimationWindowEnhancer.Core
             if (_prevClip != clip)
             {
                 _prevClip = clip;
-                _dopeLineDrawers.Clear();
+                _dopeLineRenderers.Clear();
             }
 
             if (_isStyleDirty)
@@ -87,16 +87,16 @@ namespace AnimationWindowEnhancer.Core
                     continue;
                 }
 
-                // Create a new drawer if not cached
-                if (!_dopeLineDrawers.TryGetValue(dopeLine, out var dopeLineDrawer))
+                // Create a new renderer if not cached
+                if (!_dopeLineRenderers.TryGetValue(dopeLine, out var dopeLineRenderer))
                 {
-                    dopeLineDrawer = new DopeLineDrawer(_target.animationClip, dopeLine);
-                    _dopeLineDrawers[dopeLine] = dopeLineDrawer;
+                    dopeLineRenderer = new DopeLineRenderer(_target.animationClip, dopeLine);
+                    _dopeLineRenderers[dopeLine] = dopeLineRenderer;
                 }
 
                 // Draw
                 var scrollPos = animEditorState.hierarchyState.scrollPos;
-                dopeLineDrawer.Draw(dopeSheetEditor, scrollPos);
+                dopeLineRenderer.Draw(dopeSheetEditor, scrollPos);
             }
         }
 

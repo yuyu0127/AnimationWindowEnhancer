@@ -7,7 +7,7 @@ namespace AnimationWindowEnhancer.Core
     /// <summary>
     /// Class to draw each curve associated with a DopeLine
     /// </summary>
-    public class DopeLineCurveDrawer
+    public class DopeLineCurveRenderer
     {
         private readonly AnimationClip _clip;
         private readonly EditorCurveBinding _binding;
@@ -20,7 +20,7 @@ namespace AnimationWindowEnhancer.Core
         private bool _isConstant;
         private int _hash;
 
-        public DopeLineCurveDrawer(AnimationClip clip, EditorCurveBinding binding)
+        public DopeLineCurveRenderer(AnimationClip clip, EditorCurveBinding binding)
         {
             _clip = clip;
             _binding = binding;

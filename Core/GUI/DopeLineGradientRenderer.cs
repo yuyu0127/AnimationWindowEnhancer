@@ -7,7 +7,7 @@ namespace AnimationWindowEnhancer.Core
     /// <summary>
     /// Class to draw a gradient for DopeLines representing color
     /// </summary>
-    public class DopeLineGradientDrawer
+    public class DopeLineGradientRenderer
     {
         private readonly AnimationClip _clip;
         private readonly EditorCurveBinding _bindingR;
@@ -20,7 +20,7 @@ namespace AnimationWindowEnhancer.Core
         private bool _isConstant;
         private int _hash;
 
-        public DopeLineGradientDrawer(AnimationClip clip, EditorCurveBinding bindingR, EditorCurveBinding bindingG, EditorCurveBinding bindingB, EditorCurveBinding bindingA)
+        public DopeLineGradientRenderer(AnimationClip clip, EditorCurveBinding bindingR, EditorCurveBinding bindingG, EditorCurveBinding bindingB, EditorCurveBinding bindingA)
         {
             _clip = clip;
             _bindingR = bindingR;

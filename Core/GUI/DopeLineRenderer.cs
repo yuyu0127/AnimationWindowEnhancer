@@ -9,11 +9,11 @@ namespace AnimationWindowEnhancer.Core
     /// <summary>
     /// Class to draw each DopeLine
     /// </summary>
-    public class DopeLineDrawer
+    public class DopeLineRenderer
     {
         private readonly DopeLineProxy _dopeLine;
-        private readonly DopeLineCurveDrawer[] _curveDrawers;
-        private readonly DopeLineGradientDrawer _gradientDrawer;
+        private readonly DopeLineCurveRenderer[] _curveRenderers;
+        private readonly DopeLineGradientRenderer _gradientRenderer;
         private readonly GUIContent _labelContent;
         private readonly Lazy<GUIStyle> _labelStyle = new(() =>
         {
@@ -34,7 +34,7 @@ namespace AnimationWindowEnhancer.Core
             };
         });
 
-        public DopeLineDrawer(AnimationClip clip, DopeLineProxy dopeLine)
+        public DopeLineRenderer(AnimationClip clip, DopeLineProxy dopeLine)
         {
             _dopeLine = dopeLine;
 
@@ -50,14 +50,14 @@ namespace AnimationWindowEnhancer.Core
 
             if (isColorProperty)
             {
-                _gradientDrawer = new DopeLineGradientDrawer(clip, curves[0].binding, curves[1].binding, curves[2].binding, curves[3].binding);
+                _gradientRenderer = new DopeLineGradientRenderer(clip, curves[0].binding, curves[1].binding, curves[2].binding, curves[3].binding);
             }
             else
             {
-                _curveDrawers = new DopeLineCurveDrawer[curves.Length];
+                _curveRenderers = new DopeLineCurveRenderer[curves.Length];
                 for (var i = 0; i < curves.Length; i++)
                 {
-                    _curveDrawers[i] = new DopeLineCurveDrawer(clip, curves[i].binding);
+                    _curveRenderers[i] = new DopeLineCurveRenderer(clip, curves[i].binding);
                 }
             }
 
@@ -102,16 +102,16 @@ namespace AnimationWindowEnhancer.Core
             DrawLabel(rect, dopeSheetRect);
 
             // Draw gradient
-            if (_gradientDrawer != null)
+            if (_gradientRenderer != null)
             {
-                _gradientDrawer.Draw(rect, dopeSheetRect);
+                _gradientRenderer.Draw(rect, dopeSheetRect);
             }
             // Draw curves
             else
             {
-                foreach (var curveDrawer in _curveDrawers)
+                foreach (var curveRenderer in _curveRenderers)
                 {
-                    curveDrawer?.Draw(rect, dopeSheetRect);
+                    curveRenderer?.Draw(rect, dopeSheetRect);
                 }
             }
         }
