@@ -13,6 +13,7 @@ namespace AnimationWindowEnhancer.Core
     {
         private readonly AnimationWindow _target;
         private readonly Dictionary<DopeLineProxy, DopeLineRenderer> _dopeLineRenderers = new();
+        private readonly Dictionary<CurveWrapperProxy, CurveLabelRenderer> _curveLabelRenderers = new();
 
         private bool _isStyleDirty = true;
         private float[] _values;
@@ -65,6 +66,20 @@ namespace AnimationWindowEnhancer.Core
             var curveRect = curveEditor.rect;
 
             UpdateStyle(curveRect);
+
+            var currentTime = animEditor.state.currentTime;
+            foreach (var curveWrapper in curveEditor.animationCurves)
+            {
+                // Create a new renderer if not cached
+                if (!_curveLabelRenderers.TryGetValue(curveWrapper, out var curveLabelRenderer))
+                {
+                    curveLabelRenderer = new CurveLabelRenderer(curveEditor, curveWrapper);
+                    _curveLabelRenderers[curveWrapper] = curveLabelRenderer;
+                }
+
+                // Draw
+                curveLabelRenderer.Draw(currentTime);
+            }
         }
 
         private void OnDopeSheetGUI()

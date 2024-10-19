@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEditorInternal;
 
 namespace AnimationWindowEnhancer.InternalAPIProxy
@@ -29,5 +30,8 @@ namespace AnimationWindowEnhancer.InternalAPIProxy
 
         public IEnumerable<DopeLineProxy> dopelines
             => _instance.dopelines.Select(x => new DopeLineProxy(x));
+
+        public float currentTime
+            => _instance.currentTime;
     }
 }

@@ -74,44 +74,44 @@ namespace AnimationWindowEnhancer.Core
         public void Draw(DopeSheetEditorProxy dopeSheetEditor, Vector2 scrollPos)
         {
             // Get the drawing area
-            var rect = GetVisibleRect(_dopeLine, dopeSheetEditor, scrollPos);
-            if (rect.width <= 0)
+            GetVisibleRange(_dopeLine, dopeSheetEditor, scrollPos, out var minTime, out var maxTime, out var curveRect);
+            if (curveRect.width <= 0)
             {
                 return;
             }
 
             // Do not draw if the Y-axis is out of range
-            if (rect.yMax < 0)
+            if (curveRect.yMax < 0)
             {
                 return;
             }
             var dopeSheetRect = dopeSheetEditor.rect;
-            if (dopeSheetRect.height < rect.yMax)
+            if (dopeSheetRect.height < curveRect.yMax)
             {
                 return;
             }
 
             if (_dopeLine.hasChildren)
             {
-                var maskRect = new Rect(0, rect.y, dopeSheetRect.width, rect.height);
+                var maskRect = new Rect(0, curveRect.y, dopeSheetRect.width, curveRect.height);
                 var parentDopeLineColor = AnimationWindowEnhancerPreferences.instance.ParentDopeLineColor;
                 EditorGUI.DrawRect(maskRect, parentDopeLineColor);
             }
 
             // Draw label
-            DrawLabel(rect, dopeSheetRect);
+            DrawLabel(curveRect, dopeSheetRect);
 
             // Draw gradient
             if (_gradientRenderer != null)
             {
-                _gradientRenderer.Draw(rect, dopeSheetRect);
+                _gradientRenderer.Draw(curveRect, dopeSheetRect);
             }
             // Draw curves
             else
             {
                 foreach (var curveRenderer in _curveRenderers)
                 {
-                    curveRenderer?.Draw(rect, dopeSheetRect);
+                    curveRenderer?.Draw(curveRect, dopeSheetRect, minTime, maxTime);
                 }
             }
         }
@@ -142,7 +142,9 @@ namespace AnimationWindowEnhancer.Core
         /// <summary>
         /// Get the area to draw the curve
         /// </summary>
-        private static Rect GetVisibleRect(DopeLineProxy dopeLine, DopeSheetEditorProxy dopeSheetEditor, Vector2 scrollPos)
+        private static void GetVisibleRange(
+            DopeLineProxy dopeLine, DopeSheetEditorProxy dopeSheetEditor, Vector2 scrollPos,
+            out float minTime, out float maxTime, out Rect curveRect)
         {
             var firstKey = dopeLine.keys.First();
             var firstKeyRect = dopeSheetEditor.GetKeyframeRect(dopeLine, firstKey);
@@ -150,7 +152,9 @@ namespace AnimationWindowEnhancer.Core
             var lastKey = dopeLine.keys.Last();
             var lastKeyRect = dopeSheetEditor.GetKeyframeRect(dopeLine, lastKey);
 
-            return new Rect(
+            minTime = firstKey.time;
+            maxTime = lastKey.time;
+            curveRect = new Rect(
                 firstKeyRect.x + 5,
                 firstKeyRect.y - scrollPos.y,
                 lastKeyRect.x - firstKeyRect.x + 1,

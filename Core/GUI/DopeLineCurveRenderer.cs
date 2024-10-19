@@ -13,6 +13,8 @@ namespace AnimationWindowEnhancer.Core
         private readonly EditorCurveBinding _binding;
         private readonly Gradient _heatmap;
 
+        private float _minTime;
+        private float _maxTime;
         private float _minValue;
         private float _maxValue;
         private float[] _leftValues;
@@ -33,7 +35,7 @@ namespace AnimationWindowEnhancer.Core
         /// <summary>
         /// Draws the curve within the specified range
         /// </summary>
-        public void Draw(Rect rect, Rect dopeSheetRect)
+        public void Draw(Rect curveRect, Rect dopeSheetRect, float minTime, float maxTime)
         {
             var animationCurve = AnimationUtility.GetEditorCurve(_clip, _binding);
             if (animationCurve == null)
@@ -48,15 +50,24 @@ namespace AnimationWindowEnhancer.Core
                 CacheValues(animationCurve);
             }
 
+            var minTimeRate = Mathf.InverseLerp(minTime, maxTime, _minTime);
+            var maxTimeRate = Mathf.InverseLerp(minTime, maxTime, _maxTime);
+            var localCurveRect = new Rect(
+                curveRect.x + curveRect.width * minTimeRate,
+                curveRect.y,
+                curveRect.width * (maxTimeRate - minTimeRate),
+                curveRect.height
+            );
+
             GL.PushMatrix();
             GL.Begin(GL.LINE_STRIP);
 
-            var xMin = Mathf.Max(0, rect.xMin);
-            var xMax = Mathf.Min(dopeSheetRect.width, rect.xMax);
+            var xMin = Mathf.Max(0, localCurveRect.xMin);
+            var xMax = Mathf.Min(dopeSheetRect.width, localCurveRect.xMax);
 
             if (_isConstant)
             {
-                var y = rect.center.y;
+                var y = localCurveRect.center.y;
                 var color = _heatmap.Evaluate(0.5f);
 
                 GL.Color(color);
@@ -71,28 +82,28 @@ namespace AnimationWindowEnhancer.Core
                 // With n = (arraySize - 1),
                 // x = rect.x + (rect.width * i / n)
                 // Draw if x > 0,
-                var begin = Mathf.Max(0, Mathf.CeilToInt(n * -rect.x / rect.width));
+                var begin = Mathf.Max(0, Mathf.CeilToInt(n * -localCurveRect.x / localCurveRect.width));
                 // Draw if x < dopeSheetRect.width,
-                var end = Mathf.Min(n, Mathf.FloorToInt(n * (dopeSheetRect.width - rect.x) / rect.width));
+                var end = Mathf.Min(n, Mathf.FloorToInt(n * (dopeSheetRect.width - localCurveRect.x) / localCurveRect.width));
 
                 if (begin <= end)
                 {
                     // From screen edge to start point
                     if (begin >= 1)
                     {
-                        var prevX = rect.x + rect.width * (begin - 1) / n;
-                        var beginX = rect.x + rect.width * begin / n;
+                        var prevX = localCurveRect.x + localCurveRect.width * (begin - 1) / n;
+                        var beginX = localCurveRect.x + localCurveRect.width * begin / n;
                         var edgeXRate = Mathf.InverseLerp(prevX, beginX, xMin);
                         var edgeValue = Mathf.Lerp(_rightValues[begin - 1], _leftValues[begin], edgeXRate);
                         var edgeYRate = Mathf.InverseLerp(_minValue, _maxValue, edgeValue);
-                        var edgeY = Mathf.Lerp(rect.yMax, rect.yMin + 1, edgeYRate);
+                        var edgeY = Mathf.Lerp(localCurveRect.yMax, localCurveRect.yMin + 1, edgeYRate);
                         var edgeColor = _heatmap.Evaluate(edgeYRate);
 
                         GL.Color(edgeColor);
                         GL.Vertex3(xMin, edgeY, 0);
 
                         var beginYRate = Mathf.InverseLerp(_minValue, _maxValue, _leftValues[begin]);
-                        var beginY = Mathf.Lerp(rect.yMax, rect.yMin + 1, beginYRate);
+                        var beginY = Mathf.Lerp(localCurveRect.yMax, localCurveRect.yMin + 1, beginYRate);
                         var beginColor = _heatmap.Evaluate(beginYRate);
 
                         GL.Color(beginColor);
@@ -102,17 +113,17 @@ namespace AnimationWindowEnhancer.Core
                     // Intermediate points
                     for (var i = begin; i <= end; i++)
                     {
-                        var x = rect.x + rect.width * i / n;
+                        var x = localCurveRect.x + localCurveRect.width * i / n;
 
                         var leftYRate = Mathf.InverseLerp(_minValue, _maxValue, _leftValues[i]);
-                        var leftY = Mathf.Lerp(rect.yMax, rect.yMin + 1, leftYRate);
+                        var leftY = Mathf.Lerp(localCurveRect.yMax, localCurveRect.yMin + 1, leftYRate);
                         var leftColor = _heatmap.Evaluate(leftYRate);
 
                         GL.Color(leftColor);
                         GL.Vertex3(x, leftY, 0);
 
                         var rightYRate = Mathf.InverseLerp(_minValue, _maxValue, _rightValues[i]);
-                        var rightY = Mathf.Lerp(rect.yMax, rect.yMin + 1, rightYRate);
+                        var rightY = Mathf.Lerp(localCurveRect.yMax, localCurveRect.yMin + 1, rightYRate);
                         var rightColor = _heatmap.Evaluate(rightYRate);
 
                         GL.Color(rightColor);
@@ -122,19 +133,19 @@ namespace AnimationWindowEnhancer.Core
                     // From end point to screen edge
                     if (end < arraySize - 1)
                     {
-                        var endX = rect.x + rect.width * end / n;
+                        var endX = localCurveRect.x + localCurveRect.width * end / n;
                         var endYRate = Mathf.InverseLerp(_minValue, _maxValue, _rightValues[end]);
-                        var endY = Mathf.Lerp(rect.yMax, rect.yMin + 1, endYRate);
+                        var endY = Mathf.Lerp(localCurveRect.yMax, localCurveRect.yMin + 1, endYRate);
                         var endColor = _heatmap.Evaluate(endYRate);
 
                         GL.Color(endColor);
                         GL.Vertex3(endX, endY, 0);
 
-                        var nextX = rect.x + rect.width * (end + 1) / n;
+                        var nextX = localCurveRect.x + localCurveRect.width * (end + 1) / n;
                         var edgeXRate = Mathf.InverseLerp(endX, nextX, xMax);
                         var edgeValue = Mathf.Lerp(_rightValues[end], _leftValues[end + 1], edgeXRate);
                         var edgeYRate = Mathf.InverseLerp(_minValue, _maxValue, edgeValue);
-                        var edgeY = Mathf.Lerp(rect.yMax, rect.yMin + 1, edgeYRate);
+                        var edgeY = Mathf.Lerp(localCurveRect.yMax, localCurveRect.yMin + 1, edgeYRate);
                         var edgeColor = _heatmap.Evaluate(edgeYRate);
 
                         GL.Color(edgeColor);
@@ -154,9 +165,9 @@ namespace AnimationWindowEnhancer.Core
         {
             // Get time range
             var keys = animationCurve.keys;
-            var minTime = keys[0].time;
-            var maxTime = keys[^1].time;
-            var rangeTime = maxTime - minTime;
+            _minTime = keys[0].time;
+            _maxTime = keys[^1].time;
+            var rangeTime = _maxTime - _minTime;
 
             // Adjust array size assuming value caching for each frame
             var resolution = AnimationWindowEnhancerPreferences.instance.CurveResolution;
@@ -165,7 +176,7 @@ namespace AnimationWindowEnhancer.Core
             ArrayUtility.EnsureArraySize(ref _rightValues, arraySize);
 
             // Get values
-            EvaluateCurve(minTime, maxTime, animationCurve, _leftValues, _rightValues, out _minValue, out _maxValue, out _isConstant);
+            EvaluateCurve(_minTime, _maxTime, animationCurve, _leftValues, _rightValues, out _minValue, out _maxValue, out _isConstant);
         }
 
         /// <summary>
