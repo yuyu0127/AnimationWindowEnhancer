@@ -32,7 +32,7 @@ namespace AnimationWindowEnhancer.Core
         /// <summary>
         /// Draws the gradient within the specified range
         /// </summary>
-        public void Draw(Rect curveRect, Rect dopeSheetRect)
+        public void Draw(Rect dopeLineRect, Rect dopeSheetRect)
         {
             // Get the curves for R, G, B, A
             var animationCurveR = AnimationUtility.GetEditorCurve(_clip, _bindingR);
@@ -51,12 +51,12 @@ namespace AnimationWindowEnhancer.Core
             GL.PushMatrix();
             GL.Begin(GL.QUADS);
 
-            var xMin = Mathf.Max(0, curveRect.xMin);
-            var xMax = Mathf.Min(dopeSheetRect.width, curveRect.xMax);
+            var xMin = Mathf.Max(0, dopeLineRect.xMin);
+            var xMax = Mathf.Min(dopeSheetRect.width, dopeLineRect.xMax);
 
             var height = AnimationWindowEnhancerPreferences.instance.ColorBandHeight;
-            var yMin = curveRect.yMax - height;
-            var yMax = curveRect.yMax;
+            var yMin = dopeLineRect.yMax - height;
+            var yMax = dopeLineRect.yMax;
 
             if (_isConstant)
             {
@@ -77,17 +77,17 @@ namespace AnimationWindowEnhancer.Core
                 // With n = (arraySize - 1),
                 // x = rect.x + (rect.width * i / n)
                 // Draw if x > 0,
-                var begin = Mathf.Max(0, Mathf.CeilToInt(n * -curveRect.x / curveRect.width));
+                var begin = Mathf.Max(0, Mathf.CeilToInt(n * -dopeLineRect.x / dopeLineRect.width));
                 // Draw if x < dopeSheetRect.width,
-                var end = Mathf.Min(n, Mathf.FloorToInt(n * (dopeSheetRect.width - curveRect.x) / curveRect.width));
+                var end = Mathf.Min(n, Mathf.FloorToInt(n * (dopeSheetRect.width - dopeLineRect.x) / dopeLineRect.width));
 
                 if (begin <= end)
                 {
                     // From screen edge to start point
                     if (begin >= 1)
                     {
-                        var prevX = curveRect.x + curveRect.width * (begin - 1) / n;
-                        var beginX = curveRect.x + curveRect.width * begin / n;
+                        var prevX = dopeLineRect.x + dopeLineRect.width * (begin - 1) / n;
+                        var beginX = dopeLineRect.x + dopeLineRect.width * begin / n;
                         var edgeXRate = Mathf.InverseLerp(prevX, beginX, xMin);
 
                         var color0 = Color.Lerp(_rightColors[begin - 1], _leftColors[begin], edgeXRate);
@@ -112,8 +112,8 @@ namespace AnimationWindowEnhancer.Core
 
                     for (var i = begin; i <= end - 1; i++)
                     {
-                        var x0 = curveRect.x + curveRect.width * i / n;
-                        var x1 = curveRect.x + curveRect.width * (i + 1) / n;
+                        var x0 = dopeLineRect.x + dopeLineRect.width * i / n;
+                        var x1 = dopeLineRect.x + dopeLineRect.width * (i + 1) / n;
 
                         var color0 = _rightColors[i];
                         var color1 = _leftColors[i + 1];
@@ -138,8 +138,8 @@ namespace AnimationWindowEnhancer.Core
                     // From end point to screen edge
                     if (end < arraySize - 1)
                     {
-                        var endX = curveRect.x + curveRect.width * end / n;
-                        var nextX = curveRect.x + curveRect.width * (end + 1) / n;
+                        var endX = dopeLineRect.x + dopeLineRect.width * end / n;
+                        var nextX = dopeLineRect.x + dopeLineRect.width * (end + 1) / n;
 
                         var color0 = _rightColors[end];
                         var color1 = Color.Lerp(_rightColors[end], _leftColors[end + 1], Mathf.InverseLerp(endX, nextX, xMax));

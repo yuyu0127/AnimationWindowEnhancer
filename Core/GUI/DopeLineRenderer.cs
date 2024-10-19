@@ -74,44 +74,44 @@ namespace AnimationWindowEnhancer.Core
         public void Draw(DopeSheetEditorProxy dopeSheetEditor, Vector2 scrollPos)
         {
             // Get the drawing area
-            GetVisibleRange(_dopeLine, dopeSheetEditor, scrollPos, out var minTime, out var maxTime, out var curveRect);
-            if (curveRect.width <= 0)
+            GetVisibleRange(_dopeLine, dopeSheetEditor, scrollPos, out var minTime, out var maxTime, out var dopeLineRect);
+            if (dopeLineRect.width <= 0)
             {
                 return;
             }
 
             // Do not draw if the Y-axis is out of range
-            if (curveRect.yMax < 0)
+            if (dopeLineRect.yMax < 0)
             {
                 return;
             }
             var dopeSheetRect = dopeSheetEditor.rect;
-            if (dopeSheetRect.height < curveRect.yMax)
+            if (dopeSheetRect.height < dopeLineRect.yMax)
             {
                 return;
             }
 
             if (_dopeLine.hasChildren)
             {
-                var maskRect = new Rect(0, curveRect.y, dopeSheetRect.width, curveRect.height);
+                var maskRect = new Rect(0, dopeLineRect.y, dopeSheetRect.width, dopeLineRect.height);
                 var parentDopeLineColor = AnimationWindowEnhancerPreferences.instance.ParentDopeLineColor;
                 EditorGUI.DrawRect(maskRect, parentDopeLineColor);
             }
 
             // Draw label
-            DrawLabel(curveRect, dopeSheetRect);
+            DrawLabel(dopeLineRect, dopeSheetRect);
 
             // Draw gradient
             if (_gradientRenderer != null)
             {
-                _gradientRenderer.Draw(curveRect, dopeSheetRect);
+                _gradientRenderer.Draw(dopeLineRect, dopeSheetRect);
             }
             // Draw curves
             else
             {
                 foreach (var curveRenderer in _curveRenderers)
                 {
-                    curveRenderer?.Draw(curveRect, dopeSheetRect, minTime, maxTime);
+                    curveRenderer?.Draw(dopeLineRect, dopeSheetRect, minTime, maxTime);
                 }
             }
         }
