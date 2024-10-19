@@ -21,6 +21,9 @@ namespace AnimationWindowEnhancer.InternalAPIProxy
         public override int GetHashCode()
             => _instance != null ? _instance.GetHashCode() : 0;
 
+        public bool showCurveEditor
+            => _instance.showCurveEditor;
+
         public AnimationWindowHierarchyStateProxy hierarchyState
             => new(_instance.hierarchyState);
 

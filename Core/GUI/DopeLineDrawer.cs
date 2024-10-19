@@ -71,7 +71,7 @@ namespace AnimationWindowEnhancer.Core
             _labelContent = new GUIContent(labelText);
         }
 
-        public void Draw(Rect dopeSheetRect, DopeSheetEditorProxy dopeSheetEditor, Vector2 scrollPos)
+        public void Draw(DopeSheetEditorProxy dopeSheetEditor, Vector2 scrollPos)
         {
             // Get the drawing area
             var rect = GetVisibleRect(_dopeLine, dopeSheetEditor, scrollPos);
@@ -85,6 +85,7 @@ namespace AnimationWindowEnhancer.Core
             {
                 return;
             }
+            var dopeSheetRect = dopeSheetEditor.rect;
             if (dopeSheetRect.height < rect.yMax)
             {
                 return;

@@ -40,21 +40,43 @@ namespace AnimationWindowEnhancer.Core
                 _dopeLineDrawers.Clear();
             }
 
-            var targetProxy = new AnimationWindowProxy(_target);
-            var animEditor = targetProxy.animEditor;
-            var dopeSheetEditor = animEditor.dopeSheetEditor;
-            var animEditorState = animEditor.state;
-            var dopeSheetRect = dopeSheetEditor.rect;
-            var scrollPos = animEditorState.hierarchyState.scrollPos;
-
             if (_isStyleDirty)
             {
                 _isStyleDirty = false;
                 MarkDirtyLayout();
             }
 
+            var window = new AnimationWindowProxy(_target);
+            if (window.animEditor.state.showCurveEditor)
+            {
+                OnCurveGUI();
+            }
+            else
+            {
+                OnDopeSheetGUI();
+            }
+        }
+
+        private void OnCurveGUI()
+        {
+            var window = new AnimationWindowProxy(_target);
+            var animEditor = window.animEditor;
+            var curveEditor = animEditor.curveEditor;
+            var curveRect = curveEditor.rect;
+
+            UpdateStyle(curveRect);
+        }
+
+        private void OnDopeSheetGUI()
+        {
+            var window = new AnimationWindowProxy(_target);
+            var animEditor = window.animEditor;
+            var dopeSheetEditor = animEditor.dopeSheetEditor;
+            var dopeSheetRect = dopeSheetEditor.rect;
+
             UpdateStyle(dopeSheetRect);
 
+            var animEditorState = animEditor.state;
             var isRoot = true;
             foreach (var dopeLine in animEditorState.dopelines)
             {
@@ -68,29 +90,30 @@ namespace AnimationWindowEnhancer.Core
                 // Create a new drawer if not cached
                 if (!_dopeLineDrawers.TryGetValue(dopeLine, out var dopeLineDrawer))
                 {
-                    dopeLineDrawer = new DopeLineDrawer(clip, dopeLine);
+                    dopeLineDrawer = new DopeLineDrawer(_target.animationClip, dopeLine);
                     _dopeLineDrawers[dopeLine] = dopeLineDrawer;
                 }
 
                 // Draw
-                dopeLineDrawer.Draw(dopeSheetRect, dopeSheetEditor, scrollPos);
+                var scrollPos = animEditorState.hierarchyState.scrollPos;
+                dopeLineDrawer.Draw(dopeSheetEditor, scrollPos);
             }
         }
 
         /// <summary>
         /// Updates the style to match the drawing area of the DopeSheet
         /// </summary>
-        private void UpdateStyle(Rect dopeSheetRect)
+        private void UpdateStyle(Rect rect)
         {
             var prevLeft = style.left.value.value;
             var prevTop = style.top.value.value;
             var prevWidth = style.width.value.value;
             var prevHeight = style.height.value.value;
 
-            style.left = dopeSheetRect.x + 1;
-            style.top = dopeSheetRect.y + 1;
-            style.width = dopeSheetRect.width;
-            style.height = dopeSheetRect.height;
+            style.left = rect.x + 1;
+            style.top = rect.y + 1;
+            style.width = rect.width;
+            style.height = rect.height;
 
             if (Mathf.Approximately(prevLeft, style.left.value.value) &&
                 Mathf.Approximately(prevTop, style.top.value.value) &&
