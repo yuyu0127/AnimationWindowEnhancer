@@ -165,13 +165,13 @@ namespace AnimationWindowEnhancer.Core
             ArrayUtility.EnsureArraySize(ref _rightValues, arraySize);
 
             // Get values
-            GetCurveValues(minTime, maxTime, animationCurve, _leftValues, _rightValues, out _minValue, out _maxValue, out _isConstant);
+            EvaluateCurve(minTime, maxTime, animationCurve, _leftValues, _rightValues, out _minValue, out _maxValue, out _isConstant);
         }
 
         /// <summary>
         /// Gets the values from the AnimationCurve and stores them in the array
         /// </summary>
-        private static void GetCurveValues(
+        private static void EvaluateCurve(
             float minTime, float maxTime, AnimationCurve animationCurve,
             float[] leftValues, float[] values, out float minValue, out float maxValue, out bool isConstant)
         {

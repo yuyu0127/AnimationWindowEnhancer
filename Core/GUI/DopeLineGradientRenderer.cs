@@ -185,13 +185,13 @@ namespace AnimationWindowEnhancer.Core
             ArrayUtility.EnsureArraySize(ref _rightColors, arraySize);
 
             // Get values
-            GetCurveValues(minTime, maxTime, animationCurveR, animationCurveG, animationCurveB, animationCurveA, _leftColors, _rightColors, out _isConstant);
+            EvaluateCurves(minTime, maxTime, animationCurveR, animationCurveG, animationCurveB, animationCurveA, _leftColors, _rightColors, out _isConstant);
         }
 
         /// <summary>
         /// Gets the values from the AnimationCurve and stores them in the array
         /// </summary>
-        private static void GetCurveValues(
+        private static void EvaluateCurves(
             float minTime, float maxTime,
             AnimationCurve animationCurveR, AnimationCurve animationCurveG, AnimationCurve animationCurveB, AnimationCurve animationCurveA,
             Color[] leftColors, Color[] rightColors, out bool isConstant)
