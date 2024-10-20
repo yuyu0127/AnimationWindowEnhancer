@@ -26,8 +26,8 @@ namespace AnimationWindowEnhancer.InternalAPIProxy
         public EditorCurveBinding binding
             => _instance.binding;
 
-        public Bounds bounds
-            => _instance.bounds;
+        public Bounds ComputeBoundsBetweenTime(float start, float end)
+            => _instance.ComputeBoundsBetweenTime(start, end);
 
         public AnimationClip animationClip
             => _instance.animationClip;

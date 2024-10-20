@@ -63,9 +63,9 @@ namespace AnimationWindowEnhancer.Core
             var window = new AnimationWindowProxy(_target);
             var animEditor = window.animEditor;
             var curveEditor = animEditor.curveEditor;
-            var curveRect = curveEditor.rect;
+            var curveEditorRect = curveEditor.rect;
 
-            UpdateStyle(curveRect);
+            UpdateStyle(curveEditorRect);
 
             var currentTime = animEditor.state.currentTime;
             foreach (var curveWrapper in curveEditor.animationCurves)
@@ -78,7 +78,7 @@ namespace AnimationWindowEnhancer.Core
                 }
 
                 // Draw
-                curveLabelRenderer.Draw(currentTime);
+                curveLabelRenderer.Draw(currentTime, curveEditorRect);
             }
         }
 
