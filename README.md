@@ -7,7 +7,7 @@
 ## Features
 
 * **DopeSheet Tab**: Displays curves representing value changes and gradient previews showing color changes for each row.
-* **Curve Tab**: Shows which property each curve is associated with, providing a clear link to the respective property.
+* **Curve Tab**: Shows a label for each curve to indicate the property associated with that curve.
 
 ## Setup
 
