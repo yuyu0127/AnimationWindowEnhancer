@@ -54,23 +54,25 @@ namespace AnimationWindowEnhancer.Core
             var labelRect = new Rect(labelPos.x, labelPos.y, labelWidth, 12f);
 
             // Clamp by curveEditorRect
-            
-
-            // Draw label
-            var labelColor = new Color(_curveWrapper.color.r, _curveWrapper.color.g, _curveWrapper.color.b, 0.5f);
-            var style = new GUIStyle(EditorStyles.miniLabel)
+            var clampRect = Rect.MinMaxRect(0, 0, curveEditorRect.width - 14, curveEditorRect.height - 14);
+            using (new GUI.ClipScope(clampRect))
             {
-                alignment = TextAnchor.MiddleLeft,
-                normal = { textColor = labelColor },
-                active = { textColor = labelColor },
-                hover = { textColor = labelColor },
-                focused = { textColor = labelColor },
-                onNormal = { textColor = labelColor },
-                onActive = { textColor = labelColor },
-                onHover = { textColor = labelColor },
-                onFocused = { textColor = labelColor }
-            };
-            GUI.Label(labelRect, _labelContent, style);
+                // Draw label
+                var labelColor = new Color(_curveWrapper.color.r, _curveWrapper.color.g, _curveWrapper.color.b, 0.5f);
+                var style = new GUIStyle(EditorStyles.miniLabel)
+                {
+                    alignment = TextAnchor.MiddleLeft,
+                    normal = { textColor = labelColor },
+                    active = { textColor = labelColor },
+                    hover = { textColor = labelColor },
+                    focused = { textColor = labelColor },
+                    onNormal = { textColor = labelColor },
+                    onActive = { textColor = labelColor },
+                    onHover = { textColor = labelColor },
+                    onFocused = { textColor = labelColor }
+                };
+                GUI.Label(labelRect, _labelContent, style);
+            }
         }
 
         private void RefreshCache()
