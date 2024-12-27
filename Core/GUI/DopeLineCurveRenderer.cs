@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -7,8 +8,9 @@ namespace AnimationWindowEnhancer.Core
     /// <summary>
     /// Class to draw each curve associated with a DopeLine
     /// </summary>
-    public class DopeLineCurveRenderer
+    public class DopeLineCurveRenderer : IDisposable
     {
+        private readonly Material _material;
         private readonly AnimationClip _clip;
         private readonly EditorCurveBinding _binding;
         private readonly Gradient _heatmap;
@@ -26,10 +28,16 @@ namespace AnimationWindowEnhancer.Core
         {
             _clip = clip;
             _binding = binding;
+            _material = new Material(Shader.Find("Hidden/Internal-Colored"));
 
             var valueName = binding.propertyName.Split('.').Last();
             var preferences = AnimationWindowEnhancerPreferences.instance;
             _heatmap = preferences.CurveHeatmapOverrides.Find(x => x.Name == valueName)?.Heatmap ?? preferences.DefaultCurveHeatmap;
+        }
+
+        public void Dispose()
+        {
+            UnityEngine.Object.DestroyImmediate(_material);
         }
 
         /// <summary>
@@ -61,6 +69,7 @@ namespace AnimationWindowEnhancer.Core
 
             GL.PushMatrix();
             GL.Begin(GL.LINE_STRIP);
+            _material.SetPass(0);
 
             var xMin = Mathf.Max(0, curveRect.xMin);
             var xMax = Mathf.Min(dopeSheetRect.width, curveRect.xMax);

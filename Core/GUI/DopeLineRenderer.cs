@@ -9,7 +9,7 @@ namespace AnimationWindowEnhancer.Core
     /// <summary>
     /// Class to draw each DopeLine
     /// </summary>
-    public class DopeLineRenderer
+    public class DopeLineRenderer : IDisposable
     {
         private readonly DopeLineProxy _dopeLine;
         private readonly DopeLineCurveRenderer[] _curveRenderers;
@@ -69,6 +69,15 @@ namespace AnimationWindowEnhancer.Core
                 ? objectName + " : " + commonPropertyName
                 : commonPropertyName;
             _labelContent = new GUIContent(labelText);
+        }
+
+        public void Dispose()
+        {
+            _gradientRenderer?.Dispose();
+            foreach (var curveRenderer in _curveRenderers)
+            {
+                curveRenderer?.Dispose();
+            }
         }
 
         public void Draw(DopeSheetEditorProxy dopeSheetEditor, Vector2 scrollPos)

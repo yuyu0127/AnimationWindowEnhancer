@@ -7,13 +7,14 @@ namespace AnimationWindowEnhancer.Core
     /// <summary>
     /// Class to draw a gradient for DopeLines representing color
     /// </summary>
-    public class DopeLineGradientRenderer
+    public class DopeLineGradientRenderer : IDisposable
     {
         private readonly AnimationClip _clip;
         private readonly EditorCurveBinding _bindingR;
         private readonly EditorCurveBinding _bindingG;
         private readonly EditorCurveBinding _bindingB;
         private readonly EditorCurveBinding _bindingA;
+        private readonly Material _material;
 
         private Color[] _leftColors;
         private Color[] _rightColors;
@@ -27,6 +28,12 @@ namespace AnimationWindowEnhancer.Core
             _bindingG = bindingG;
             _bindingB = bindingB;
             _bindingA = bindingA;
+            _material = new Material(Shader.Find("Hidden/Internal-Colored"));
+        }
+
+        public void Dispose()
+        {
+            UnityEngine.Object.DestroyImmediate(_material);
         }
 
         /// <summary>
@@ -50,6 +57,7 @@ namespace AnimationWindowEnhancer.Core
 
             GL.PushMatrix();
             GL.Begin(GL.QUADS);
+            _material.SetPass(0);
 
             var xMin = Mathf.Max(0, dopeLineRect.xMin);
             var xMax = Mathf.Min(dopeSheetRect.width, dopeLineRect.xMax);

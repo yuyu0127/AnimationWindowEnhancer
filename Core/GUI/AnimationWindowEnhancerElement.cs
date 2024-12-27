@@ -26,6 +26,15 @@ namespace AnimationWindowEnhancer.Core
             onGUIHandler = OnGUI;
         }
 
+        protected override void Dispose(bool disposeManaged)
+        {
+            foreach (var dopeLineRenderer in _dopeLineRenderers.Values)
+            {
+                dopeLineRenderer.Dispose();
+            }
+            base.Dispose(disposeManaged);
+        }
+
         private void OnGUI()
         {
             var clip = _target.animationClip;
