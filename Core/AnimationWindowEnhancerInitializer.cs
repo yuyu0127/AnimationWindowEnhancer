@@ -27,7 +27,29 @@ namespace AnimationWindowEnhancer.Core
                 }
                 var overlayElement = new AnimationWindowEnhancerElement(animationWindow);
                 root.Add(overlayElement);
+
+                // Options
+                var optionsElement = new AnimationWindowEnhancerOptionsElement();
+                root.Add(optionsElement);
             }
+        }
+    }
+
+    public static class AnimationWindowEnhancerPrefs
+    {
+        private const string ShowCurveKey = "AnimationWindowEnhancer.ShowCurve";
+        private const string ShowLabelKey = "AnimationWindowEnhancer.ShowLabel";
+
+        public static bool ShowCurve
+        {
+            get => EditorPrefs.GetBool(ShowCurveKey, true);
+            set => EditorPrefs.SetBool(ShowCurveKey, value);
+        }
+
+        public static bool ShowLabel
+        {
+            get => EditorPrefs.GetBool(ShowLabelKey, true);
+            set => EditorPrefs.SetBool(ShowLabelKey, value);
         }
     }
 }

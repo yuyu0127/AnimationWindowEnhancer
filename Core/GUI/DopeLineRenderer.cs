@@ -82,6 +82,11 @@ namespace AnimationWindowEnhancer.Core
 
         public void Draw(DopeSheetEditorProxy dopeSheetEditor, Vector2 scrollPos)
         {
+            if (!AnimationWindowEnhancerPrefs.ShowLabel && !AnimationWindowEnhancerPrefs.ShowCurve)
+            {
+                return;
+            }
+
             // Get the drawing area
             GetVisibleRange(_dopeLine, dopeSheetEditor, scrollPos, out var minTime, out var maxTime, out var dopeLineRect);
             if (dopeLineRect.width <= 0)
@@ -108,19 +113,25 @@ namespace AnimationWindowEnhancer.Core
             }
 
             // Draw label
-            DrawLabel(dopeLineRect, dopeSheetRect);
+            if (AnimationWindowEnhancerPrefs.ShowLabel)
+            {
+                DrawLabel(dopeLineRect, dopeSheetRect);
+            }
 
             // Draw gradient
-            if (_gradientRenderer != null)
+            if (AnimationWindowEnhancerPrefs.ShowCurve)
             {
-                _gradientRenderer.Draw(dopeLineRect, dopeSheetRect);
-            }
-            // Draw curves
-            else
-            {
-                foreach (var curveRenderer in _curveRenderers)
+                if (_gradientRenderer != null)
                 {
-                    curveRenderer?.Draw(dopeLineRect, dopeSheetRect, minTime, maxTime);
+                    _gradientRenderer.Draw(dopeLineRect, dopeSheetRect);
+                }
+                // Draw curves
+                else
+                {
+                    foreach (var curveRenderer in _curveRenderers)
+                    {
+                        curveRenderer?.Draw(dopeLineRect, dopeSheetRect, minTime, maxTime);
+                    }
                 }
             }
         }

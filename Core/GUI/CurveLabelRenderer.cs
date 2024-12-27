@@ -30,6 +30,11 @@ namespace AnimationWindowEnhancer.Core
 
         public void Draw(float currentTime, Rect curveEditorRect)
         {
+            if (!AnimationWindowEnhancerPrefs.ShowLabel)
+            {
+                return;
+            }
+
             var hash = _curveWrapper.curve.GetHashCode();
             if (_hash != hash)
             {
