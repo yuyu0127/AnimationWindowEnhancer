@@ -2,6 +2,8 @@
 
 This package functionality to display curve and color previews on Unity's built-in Animation Window DopeSheet.
 
+[![license](https://img.shields.io/badge/LICENSE-MIT-green.svg)](LICENSE.md)
+
 ## Features
 
 - **Curve Preview**: Displays a preview of the curve in the DopeSheet.
@@ -18,3 +20,23 @@ This package functionality to display curve and color previews on Unity's built-
 
 ### Preferences
 <img width="598" alt="preferences" src="https://github.com/user-attachments/assets/d498b292-bd8a-465a-b15d-8a469bdd4044" />
+
+## Installation
+
+1. Open Package Manager from Window > Package Manager
+2. Click on the "+" button > Add package from git URL
+3. Enter the following URL:
+
+```
+https://github.com/yuyu0127/AnimationWindowEnhancer.git
+```
+
+Or open Packages/manifest.json and add the following to the dependencies block:
+
+```json
+{
+    "dependencies": {
+        "com.yuyu.animationwindowenhancer": "https://github.com/yuyu0127/AnimationWindowEnhancer.git"
+    }
+}
+```
