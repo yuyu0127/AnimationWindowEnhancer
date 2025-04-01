@@ -1,0 +1,22 @@
+{
+  "name": "com.yuyu.animationwindowenhancer",
+  "version": "1.0.0",
+  "displayName": "Animation Window Enhancer",
+  "description": "Provides functionality to display curve and color previews on Unity's built-in Animation Window DopeSheet.",
+  "unity": "2020.3",
+  "documentationUrl": "",
+  "changelogUrl": "",
+  "licensesUrl": "",
+  "dependencies": {
+  },
+  "keywords": [
+    "animation",
+    "editor",
+    "enhancer"
+  ],
+  "author": {
+    "name": "yuyu0127",
+    "email": "yuyut@ymail.ne.jp",
+    "url": "https://github.com/yuyu0127"
+  }
+}
