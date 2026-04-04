@@ -10,7 +10,17 @@ namespace AnimationWindowEnhancer.Core
     /// </summary>
     public class DopeLineCurveRenderer : IDisposable
     {
-        private readonly Material _material;
+        private static Material s_material;
+        private static Material SharedMaterial
+        {
+            get
+            {
+                if (s_material == null)
+                    s_material = new Material(Shader.Find("Hidden/Internal-Colored"));
+                return s_material;
+            }
+        }
+
         private readonly AnimationClip _clip;
         private readonly EditorCurveBinding _binding;
         private readonly Gradient _heatmap;
@@ -28,7 +38,6 @@ namespace AnimationWindowEnhancer.Core
         {
             _clip = clip;
             _binding = binding;
-            _material = new Material(Shader.Find("Hidden/Internal-Colored"));
 
             var valueName = binding.propertyName.Split('.').Last();
             var preferences = AnimationWindowEnhancerPreferences.instance;
@@ -37,7 +46,6 @@ namespace AnimationWindowEnhancer.Core
 
         public void Dispose()
         {
-            UnityEngine.Object.DestroyImmediate(_material);
         }
 
         /// <summary>
@@ -69,7 +77,7 @@ namespace AnimationWindowEnhancer.Core
 
             GL.PushMatrix();
             GL.Begin(GL.LINE_STRIP);
-            _material.SetPass(0);
+            SharedMaterial.SetPass(0);
 
             var xMin = Mathf.Max(0, curveRect.xMin);
             var xMax = Mathf.Min(dopeSheetRect.width, curveRect.xMax);
@@ -185,7 +193,8 @@ namespace AnimationWindowEnhancer.Core
             ArrayUtility.EnsureArraySize(ref _rightValues, arraySize);
 
             // Get values
-            EvaluateCurve(_minTime, _maxTime, animationCurve, _leftValues, _rightValues, out _minValue, out _maxValue, out _isConstant);
+            EvaluateCurve(_minTime, _maxTime, animationCurve, _leftValues, _rightValues, out _minValue, out _maxValue);
+            _isConstant = Mathf.Approximately(_minValue, _maxValue);
         }
 
         /// <summary>
@@ -193,11 +202,10 @@ namespace AnimationWindowEnhancer.Core
         /// </summary>
         private static void EvaluateCurve(
             float minTime, float maxTime, AnimationCurve animationCurve,
-            float[] leftValues, float[] values, out float minValue, out float maxValue, out bool isConstant)
+            float[] leftValues, float[] values, out float minValue, out float maxValue)
         {
             minValue = float.MaxValue;
             maxValue = float.MinValue;
-            isConstant = true;
 
             var arraySize = leftValues.Length;
             for (var i = 0; i < arraySize; i++)
@@ -211,14 +219,9 @@ namespace AnimationWindowEnhancer.Core
                 leftValues[i] = leftValue;
 
                 var value = animationCurve.Evaluate(time + eps);
-                minValue = Mathf.Min(minValue, value);
-                maxValue = Mathf.Max(maxValue, value);
+                minValue = Mathf.Min(minValue, Mathf.Min(leftValue, value));
+                maxValue = Mathf.Max(maxValue, Mathf.Max(leftValue, value));
                 values[i] = value;
-
-                if (isConstant && !Mathf.Approximately(leftValue, value))
-                {
-                    isConstant = false;
-                }
             }
         }
     }

@@ -9,12 +9,22 @@ namespace AnimationWindowEnhancer.Core
     /// </summary>
     public class DopeLineGradientRenderer : IDisposable
     {
+        private static Material s_material;
+        private static Material SharedMaterial
+        {
+            get
+            {
+                if (s_material == null)
+                    s_material = new Material(Shader.Find("Hidden/Internal-Colored"));
+                return s_material;
+            }
+        }
+
         private readonly AnimationClip _clip;
         private readonly EditorCurveBinding _bindingR;
         private readonly EditorCurveBinding _bindingG;
         private readonly EditorCurveBinding _bindingB;
         private readonly EditorCurveBinding _bindingA;
-        private readonly Material _material;
 
         private Color[] _leftColors;
         private Color[] _rightColors;
@@ -28,12 +38,10 @@ namespace AnimationWindowEnhancer.Core
             _bindingG = bindingG;
             _bindingB = bindingB;
             _bindingA = bindingA;
-            _material = new Material(Shader.Find("Hidden/Internal-Colored"));
         }
 
         public void Dispose()
         {
-            UnityEngine.Object.DestroyImmediate(_material);
         }
 
         /// <summary>
@@ -57,7 +65,7 @@ namespace AnimationWindowEnhancer.Core
 
             GL.PushMatrix();
             GL.Begin(GL.QUADS);
-            _material.SetPass(0);
+            SharedMaterial.SetPass(0);
 
             var xMin = Mathf.Max(0, dopeLineRect.xMin);
             var xMax = Mathf.Min(dopeSheetRect.width, dopeLineRect.xMax);
@@ -193,7 +201,8 @@ namespace AnimationWindowEnhancer.Core
             ArrayUtility.EnsureArraySize(ref _rightColors, arraySize);
 
             // Get values
-            EvaluateCurves(minTime, maxTime, animationCurveR, animationCurveG, animationCurveB, animationCurveA, _leftColors, _rightColors, out _isConstant);
+            EvaluateCurves(minTime, maxTime, animationCurveR, animationCurveG, animationCurveB, animationCurveA, _leftColors, _rightColors);
+            _isConstant = arraySize > 0 && CheckConstant(_leftColors, _rightColors, arraySize);
         }
 
         /// <summary>
@@ -202,10 +211,8 @@ namespace AnimationWindowEnhancer.Core
         private static void EvaluateCurves(
             float minTime, float maxTime,
             AnimationCurve animationCurveR, AnimationCurve animationCurveG, AnimationCurve animationCurveB, AnimationCurve animationCurveA,
-            Color[] leftColors, Color[] rightColors, out bool isConstant)
+            Color[] leftColors, Color[] rightColors)
         {
-            isConstant = true;
-
             var arraySize = leftColors.Length;
             for (var i = 0; i < arraySize; i++)
             {
@@ -214,27 +221,31 @@ namespace AnimationWindowEnhancer.Core
 
                 // To draw the gradient correctly for changes below 1 frame, also get a value with a slight time shift forward
                 var eps = 1e-5f;
-                var leftColor = new Color(
+                leftColors[i] = new Color(
                     animationCurveR.Evaluate(time - eps),
                     animationCurveG.Evaluate(time - eps),
                     animationCurveB.Evaluate(time - eps),
                     animationCurveA.Evaluate(time - eps)
                 );
-                leftColors[i] = leftColor;
 
-                var rightColor = new Color(
+                rightColors[i] = new Color(
                     animationCurveR.Evaluate(time + eps),
                     animationCurveG.Evaluate(time + eps),
                     animationCurveB.Evaluate(time + eps),
                     animationCurveA.Evaluate(time + eps)
                 );
-                rightColors[i] = rightColor;
-
-                if (isConstant && leftColor != rightColor)
-                {
-                    isConstant = false;
-                }
             }
+        }
+
+        private static bool CheckConstant(Color[] leftColors, Color[] rightColors, int arraySize)
+        {
+            var reference = rightColors[0];
+            for (var i = 0; i < arraySize; i++)
+            {
+                if (leftColors[i] != reference || rightColors[i] != reference)
+                    return false;
+            }
+            return true;
         }
     }
 }
