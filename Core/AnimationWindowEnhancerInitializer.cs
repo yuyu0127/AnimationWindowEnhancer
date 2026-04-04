@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AnimationWindowEnhancer.InternalAPIProxy;
 using UnityEditor;
 using UnityEngine.UIElements;
@@ -10,6 +11,8 @@ namespace AnimationWindowEnhancer.Core
     [InitializeOnLoad]
     public static class AnimationWindowEnhancerInitializer
     {
+        private static readonly HashSet<AnimationWindow> _initializedWindows = new();
+
         static AnimationWindowEnhancerInitializer()
         {
             EditorApplication.update += Update;
@@ -17,14 +20,32 @@ namespace AnimationWindowEnhancer.Core
 
         private static void Update()
         {
-            // Get already opened AnimationWindows
-            foreach (var animationWindow in AnimationWindowProxy.s_AnimationWindows)
+            var animationWindows = AnimationWindowProxy.s_AnimationWindows;
+            if (animationWindows == null)
             {
-                var root = animationWindow.rootVisualElement;
-                if (root.Q<AnimationWindowEnhancerElement>() != null)
+                return;
+            }
+
+            // Skip if the window count hasn't changed
+            if (animationWindows.Count == _initializedWindows.Count)
+            {
+                return;
+            }
+
+            // Remove closed windows from tracking
+            _initializedWindows.RemoveWhere(w => !animationWindows.Contains(w));
+
+            // Add elements to new windows
+            foreach (var animationWindow in animationWindows)
+            {
+                if (_initializedWindows.Contains(animationWindow))
                 {
                     continue;
                 }
+
+                _initializedWindows.Add(animationWindow);
+
+                var root = animationWindow.rootVisualElement;
 
                 var overlayElement = new AnimationWindowEnhancerElement(animationWindow);
                 root.Add(overlayElement);
