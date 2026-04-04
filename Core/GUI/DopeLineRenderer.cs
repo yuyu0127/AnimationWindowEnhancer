@@ -15,24 +15,9 @@ namespace AnimationWindowEnhancer.Core
         private readonly DopeLineCurveRenderer[] _curveRenderers;
         private readonly DopeLineGradientRenderer _gradientRenderer;
         private readonly GUIContent _labelContent;
-        private readonly Lazy<GUIStyle> _labelStyle = new(() =>
-        {
-            var preferences = AnimationWindowEnhancerPreferences.instance;
-            var color = preferences.LabelColor;
-            return new GUIStyle(EditorStyles.miniLabel)
-            {
-                fontSize = preferences.LabelFontSize,
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = color },
-                hover = { textColor = color },
-                active = { textColor = color },
-                focused = { textColor = color },
-                onNormal = { textColor = color },
-                onHover = { textColor = color },
-                onActive = { textColor = color },
-                onFocused = { textColor = color },
-            };
-        });
+        private GUIStyle _labelStyle;
+        private Color _cachedLabelColor;
+        private int _cachedLabelFontSize;
 
         public DopeLineRenderer(AnimationClip clip, DopeLineProxy dopeLine)
         {
@@ -74,9 +59,12 @@ namespace AnimationWindowEnhancer.Core
         public void Dispose()
         {
             _gradientRenderer?.Dispose();
-            foreach (var curveRenderer in _curveRenderers)
+            if (_curveRenderers != null)
             {
-                curveRenderer?.Dispose();
+                foreach (var curveRenderer in _curveRenderers)
+                {
+                    curveRenderer?.Dispose();
+                }
             }
         }
 
@@ -89,7 +77,10 @@ namespace AnimationWindowEnhancer.Core
             }
 
             // Get the drawing area
-            GetVisibleRange(_dopeLine, dopeSheetEditor, scrollPos, out var minTime, out var maxTime, out var dopeLineRect);
+            if (!GetVisibleRange(_dopeLine, dopeSheetEditor, scrollPos, out var minTime, out var maxTime, out var dopeLineRect))
+            {
+                return;
+            }
             if (dopeLineRect.width <= 0)
             {
                 return;
@@ -140,10 +131,37 @@ namespace AnimationWindowEnhancer.Core
         /// <summary>
         /// Draw the label at a suitable position
         /// </summary>
+        private GUIStyle GetLabelStyle()
+        {
+            var preferences = AnimationWindowEnhancerPreferences.instance;
+            var color = preferences.LabelColor;
+            var fontSize = preferences.LabelFontSize;
+            if (_labelStyle == null || _cachedLabelColor != color || _cachedLabelFontSize != fontSize)
+            {
+                _cachedLabelColor = color;
+                _cachedLabelFontSize = fontSize;
+                _labelStyle = new GUIStyle(EditorStyles.miniLabel)
+                {
+                    fontSize = fontSize,
+                    alignment = TextAnchor.MiddleCenter,
+                    normal = { textColor = color },
+                    hover = { textColor = color },
+                    active = { textColor = color },
+                    focused = { textColor = color },
+                    onNormal = { textColor = color },
+                    onHover = { textColor = color },
+                    onActive = { textColor = color },
+                    onFocused = { textColor = color },
+                };
+            }
+            return _labelStyle;
+        }
+
         private void DrawLabel(Rect rect, Rect dopeSheetRect)
         {
+            var style = GetLabelStyle();
             var labelCenter = rect.center.x;
-            var labelWidth = _labelStyle.Value.CalcSize(_labelContent).x;
+            var labelWidth = style.CalcSize(_labelContent).x;
             var labelLeft = labelCenter - labelWidth / 2;
             var labelRight = labelCenter + labelWidth / 2;
             if (labelLeft < 0)
@@ -157,20 +175,29 @@ namespace AnimationWindowEnhancer.Core
                 labelRight = dopeSheetRect.width;
             }
             var labelRect = new Rect(labelLeft, rect.y, labelRight - labelLeft, rect.height);
-            EditorGUI.LabelField(labelRect, _labelContent, _labelStyle.Value);
+            EditorGUI.LabelField(labelRect, _labelContent, style);
         }
 
         /// <summary>
         /// Get the area to draw the curve
         /// </summary>
-        private static void GetVisibleRange(
+        private static bool GetVisibleRange(
             DopeLineProxy dopeLine, DopeSheetEditorProxy dopeSheetEditor, Vector2 scrollPos,
             out float minTime, out float maxTime, out Rect curveRect)
         {
-            var firstKey = dopeLine.keys.First();
+            var keys = dopeLine.keys;
+            if (!keys.Any())
+            {
+                minTime = 0;
+                maxTime = 0;
+                curveRect = Rect.zero;
+                return false;
+            }
+
+            var firstKey = keys.First();
             var firstKeyRect = dopeSheetEditor.GetKeyframeRect(dopeLine, firstKey);
 
-            var lastKey = dopeLine.keys.Last();
+            var lastKey = keys.Last();
             var lastKeyRect = dopeSheetEditor.GetKeyframeRect(dopeLine, lastKey);
 
             minTime = firstKey.time;
@@ -181,6 +208,7 @@ namespace AnimationWindowEnhancer.Core
                 lastKeyRect.x - firstKeyRect.x + 1,
                 firstKeyRect.height - 2
             );
+            return true;
         }
     }
 }
