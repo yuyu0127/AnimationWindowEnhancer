@@ -14,9 +14,12 @@ namespace AnimationWindowEnhancer.Core
         private readonly AnimationWindow _animationWindow;
         private readonly Dictionary<DopeLineProxy, DopeLineRenderer> _dopeLineRenderers = new();
         private readonly Dictionary<CurveWrapperProxy, CurveLabelRenderer> _curveLabelRenderers = new();
+        private readonly HashSet<DopeLineProxy> _usedDopeLines = new();
+        private readonly List<DopeLineProxy> _staleDopeLines = new();
+        private readonly HashSet<CurveWrapperProxy> _usedCurveWrappers = new();
+        private readonly List<CurveWrapperProxy> _staleCurveWrappers = new();
 
         private bool _isStyleDirty = true;
-        private float[] _values;
         private AnimationClip _prevClip;
 
         public AnimationWindowEnhancerElement(AnimationWindow animationWindow)
@@ -48,6 +51,7 @@ namespace AnimationWindowEnhancer.Core
             {
                 _prevClip = clip;
                 _dopeLineRenderers.Clear();
+                _curveLabelRenderers.Clear();
             }
 
             if (_isStyleDirty)
@@ -57,20 +61,19 @@ namespace AnimationWindowEnhancer.Core
             }
 
             var window = new AnimationWindowProxy(_animationWindow);
-            if (window.animEditor.state.showCurveEditor)
+            var animEditor = window.animEditor;
+            if (animEditor.state.showCurveEditor)
             {
-                OnCurveGUI();
+                OnCurveGUI(animEditor);
             }
             else
             {
-                OnDopeSheetGUI();
+                OnDopeSheetGUI(animEditor);
             }
         }
 
-        private void OnCurveGUI()
+        private void OnCurveGUI(AnimEditorProxy animEditor)
         {
-            var window = new AnimationWindowProxy(_animationWindow);
-            var animEditor = window.animEditor;
             var curveEditor = animEditor.curveEditor;
             var curveEditorRect = curveEditor.rect;
 
@@ -78,8 +81,11 @@ namespace AnimationWindowEnhancer.Core
 
             var clip = _animationWindow.animationClip;
             var currentTime = animEditor.state.currentTime;
+            _usedCurveWrappers.Clear();
             foreach (var curveWrapper in curveEditor.animationCurves)
             {
+                _usedCurveWrappers.Add(curveWrapper);
+
                 // Create a new renderer if not cached
                 if (!_curveLabelRenderers.TryGetValue(curveWrapper, out var curveLabelRenderer))
                 {
@@ -90,12 +96,20 @@ namespace AnimationWindowEnhancer.Core
                 // Draw
                 curveLabelRenderer.Draw(currentTime, curveEditorRect);
             }
+
+            // Remove stale entries
+            _staleCurveWrappers.Clear();
+            foreach (var key in _curveLabelRenderers.Keys)
+            {
+                if (!_usedCurveWrappers.Contains(key))
+                    _staleCurveWrappers.Add(key);
+            }
+            foreach (var key in _staleCurveWrappers)
+                _curveLabelRenderers.Remove(key);
         }
 
-        private void OnDopeSheetGUI()
+        private void OnDopeSheetGUI(AnimEditorProxy animEditor)
         {
-            var window = new AnimationWindowProxy(_animationWindow);
-            var animEditor = window.animEditor;
             var dopeSheetEditor = animEditor.dopeSheetEditor;
             var dopeSheetRect = dopeSheetEditor.rect;
 
@@ -103,6 +117,7 @@ namespace AnimationWindowEnhancer.Core
 
             var animEditorState = animEditor.state;
             var isRoot = true;
+            _usedDopeLines.Clear();
             foreach (var dopeLine in animEditorState.dopelines)
             {
                 // Skip the first element as it is the root element
@@ -111,6 +126,8 @@ namespace AnimationWindowEnhancer.Core
                     isRoot = false;
                     continue;
                 }
+
+                _usedDopeLines.Add(dopeLine);
 
                 // Create a new renderer if not cached
                 if (!_dopeLineRenderers.TryGetValue(dopeLine, out var dopeLineRenderer))
@@ -122,6 +139,19 @@ namespace AnimationWindowEnhancer.Core
                 // Draw
                 var scrollPos = animEditorState.hierarchyState.scrollPos;
                 dopeLineRenderer.Draw(dopeSheetEditor, scrollPos);
+            }
+
+            // Remove stale entries
+            _staleDopeLines.Clear();
+            foreach (var key in _dopeLineRenderers.Keys)
+            {
+                if (!_usedDopeLines.Contains(key))
+                    _staleDopeLines.Add(key);
+            }
+            foreach (var key in _staleDopeLines)
+            {
+                _dopeLineRenderers[key].Dispose();
+                _dopeLineRenderers.Remove(key);
             }
         }
 
