@@ -28,6 +28,13 @@ namespace AnimationWindowEnhancer.InternalAPIProxy
             => _instance.rect;
 
         public Rect GetKeyframeRect(in DopeLineProxy dopeLine, in AnimationWindowKeyframeProxy keyframe)
-            => (Rect) _getKeyframeRectMethod.Invoke(_instance, new object[] { dopeLine.Instance, keyframe.Instance });
+        {
+            if (_getKeyframeRectMethod == null)
+            {
+                UnityEngine.Debug.LogWarning("[AnimationWindowEnhancer] Could not find method 'DopeSheetEditor.GetKeyframeRect'. This Unity version may not be supported.");
+                return Rect.zero;
+            }
+            return (Rect) _getKeyframeRectMethod.Invoke(_instance, new object[] { dopeLine.Instance, keyframe.Instance });
+        }
     }
 }

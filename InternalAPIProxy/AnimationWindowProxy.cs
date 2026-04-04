@@ -28,6 +28,16 @@ namespace AnimationWindowEnhancer.InternalAPIProxy
             => new(_instance.animEditor);
 
         public static List<AnimationWindow> s_AnimationWindows
-            => (List<AnimationWindow>) _animationWindowsField.GetValue(null);
+        {
+            get
+            {
+                if (_animationWindowsField == null)
+                {
+                    UnityEngine.Debug.LogWarning("[AnimationWindowEnhancer] Could not find field 'AnimationWindow.s_AnimationWindows'. This Unity version may not be supported.");
+                    return null;
+                }
+                return (List<AnimationWindow>) _animationWindowsField.GetValue(null);
+            }
+        }
     }
 }
