@@ -8,6 +8,7 @@ namespace AnimationWindowEnhancer.Core
     {
         private readonly CurveWrapperProxy _curveWrapper;
         private readonly CurveEditorProxy _curveEditor;
+        private readonly AnimationClip _animationClip;
         private readonly GUIContent _labelContent;
 
         private int _hash;
@@ -17,10 +18,11 @@ namespace AnimationWindowEnhancer.Core
         private float _maxValue;
         private Bounds _bounds;
 
-        public CurveLabelRenderer(CurveEditorProxy curveEditor, CurveWrapperProxy curveWrapper)
+        public CurveLabelRenderer(CurveEditorProxy curveEditor, CurveWrapperProxy curveWrapper, AnimationClip animationClip)
         {
             _curveEditor = curveEditor;
             _curveWrapper = curveWrapper;
+            _animationClip = animationClip;
             var binding = _curveWrapper.binding;
             var text = string.IsNullOrEmpty(binding.path)
                 ? binding.propertyName
@@ -91,7 +93,7 @@ namespace AnimationWindowEnhancer.Core
 
             var rangeTime = _maxTime - _minTime;
             var resolution = AnimationWindowEnhancerPreferences.instance.CurveResolution;
-            var arraySize = Mathf.RoundToInt(rangeTime * _curveWrapper.animationClip.frameRate * resolution) + 1;
+            var arraySize = Mathf.RoundToInt(rangeTime * _animationClip.frameRate * resolution) + 1;
             for (var i = 0; i < arraySize; i++)
             {
                 var xt = (float) i / (arraySize - 1);

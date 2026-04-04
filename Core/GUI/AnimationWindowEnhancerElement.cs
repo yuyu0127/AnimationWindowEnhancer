@@ -76,13 +76,14 @@ namespace AnimationWindowEnhancer.Core
 
             UpdateStyle(curveEditorRect);
 
+            var clip = _animationWindow.animationClip;
             var currentTime = animEditor.state.currentTime;
             foreach (var curveWrapper in curveEditor.animationCurves)
             {
                 // Create a new renderer if not cached
                 if (!_curveLabelRenderers.TryGetValue(curveWrapper, out var curveLabelRenderer))
                 {
-                    curveLabelRenderer = new CurveLabelRenderer(curveEditor, curveWrapper);
+                    curveLabelRenderer = new CurveLabelRenderer(curveEditor, curveWrapper, clip);
                     _curveLabelRenderers[curveWrapper] = curveLabelRenderer;
                 }
 

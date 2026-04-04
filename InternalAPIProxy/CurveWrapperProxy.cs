@@ -29,9 +29,6 @@ namespace AnimationWindowEnhancer.InternalAPIProxy
         public Bounds ComputeBoundsBetweenTime(float start, float end)
             => _instance.ComputeBoundsBetweenTime(start, end);
 
-        public AnimationClip animationClip
-            => _instance.animationClip;
-
         public Color color
             => _instance.color;
     }
