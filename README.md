@@ -1,5 +1,7 @@
 # Animation Window Enhancer
 
+<img src="https://github.com/user-attachments/assets/60d46ca0-655f-41d9-8687-5a1c1f662f68" />
+
 This package adds functionality to display curve and color previews in Unity's built-in Animation Window DopeSheet.
 
 [![license](https://img.shields.io/badge/LICENSE-MIT-green.svg)](LICENSE.md)
