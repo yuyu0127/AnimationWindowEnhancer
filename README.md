@@ -4,6 +4,8 @@ This package adds functionality to display curve and color previews in Unity's b
 
 [![license](https://img.shields.io/badge/LICENSE-MIT-green.svg)](LICENSE.md)
 
+> [日本語](README_JP.md)
+
 ## Installation
 
 1. Open the Package Manager from **Window > Package Manager**  
