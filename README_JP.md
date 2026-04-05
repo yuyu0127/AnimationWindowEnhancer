@@ -1,5 +1,7 @@
 # Animation Window Enhancer
 
+<img src="https://github.com/user-attachments/assets/10f1cd65-c33b-4075-9f00-4e79afd57196" />
+
 Unity 標準の Animation Window の DopeSheet 上に、カーブや色のプレビューを表示するパッケージです。
 
 [![license](https://img.shields.io/badge/LICENSE-MIT-green.svg)](LICENSE.md)
